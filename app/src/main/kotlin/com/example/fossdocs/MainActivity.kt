@@ -7,6 +7,9 @@ import androidx.activity.enableEdgeToEdge
 import com.example.fossdocs.screens.MainScreen
 import com.example.fossdocs.ui.theme.FOSSDocsTheme
 
+/**
+ * Entry point of the app.
+ */
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

@@ -28,6 +28,9 @@ import androidx.compose.ui.unit.dp
 import com.example.fossdocs.screencomponents.DocumentPreviewCard
 import com.example.fossdocs.viewmodels.sampleDocs
 
+/**
+ * Main screen of the app, shows a list of recent documents and a button to select a file.
+ */
 @Composable
 fun MainScreen() {
     val context = LocalContext.current
@@ -80,7 +83,12 @@ fun MainScreen() {
     }
 }
 
-// Corrected function to get the file name
+
+/**
+ * Helper function to get the file name from a URI.
+ *
+ * @param contentResolver The ContentResolver to use for querying the URI.
+ */
 fun getFileName(contentResolver: ContentResolver, uri: Uri): String {
     val cursor: Cursor? = contentResolver.query(uri, null, null, null, null)
     return cursor?.use {

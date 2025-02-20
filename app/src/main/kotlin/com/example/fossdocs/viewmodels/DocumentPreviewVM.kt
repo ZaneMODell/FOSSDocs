@@ -3,6 +3,9 @@ import android.net.Uri
 import androidx.annotation.DrawableRes
 import com.example.fossdocs.R
 
+/**
+ * View model for a document preview.
+ */
 data class DocumentPreviewVM(
     val title: String = "",
     val previewImageUri: Uri? = null,  // For file-based images

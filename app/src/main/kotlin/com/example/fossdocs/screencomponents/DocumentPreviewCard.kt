@@ -16,6 +16,10 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.fossdocs.viewmodels.DocumentPreviewVM
 import com.example.fossdocs.R
 
+
+/**
+ * Displays a preview of a document in the recent documents screen.
+ */
 @Composable
 fun DocumentPreviewCard(doc: DocumentPreviewVM) {
     Column(
@@ -45,6 +49,9 @@ fun DocumentPreviewCard(doc: DocumentPreviewVM) {
     }
 }
 
+/**
+ * Preview of the DocumentPreviewCard composable.
+ */
 @Preview(showBackground = true)
 @Composable
 fun DocumentPreviewPreview() {
