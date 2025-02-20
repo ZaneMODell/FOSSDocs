@@ -48,22 +48,17 @@ fun MainScreen() {
         }
     }
 
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        snackbarHost = {
-            if (showSnackbar) {
-                Snackbar(
-                    action = {
-                        TextButton(onClick = { showSnackbar = false }) {
-                            Text("Dismiss")
-                        }
-                    }
-                ) {
-                    Text("File: ${selectedFileName.orEmpty()}, Type: ${selectedMimeType.orEmpty()}")
+    Scaffold(modifier = Modifier.fillMaxSize(), snackbarHost = {
+        if (showSnackbar) {
+            Snackbar(action = {
+                TextButton(onClick = { showSnackbar = false }) {
+                    Text("Dismiss")
                 }
+            }) {
+                Text("File: ${selectedFileName.orEmpty()}, Type: ${selectedMimeType.orEmpty()}")
             }
         }
-    ) { innerPadding ->
+    }) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -72,11 +67,12 @@ fun MainScreen() {
             verticalArrangement = Arrangement.Center
         ) {
             Row {
-                sampleDocs.forEach {documentPreviewVM ->
+                sampleDocs.forEach { documentPreviewVM ->
                     DocumentPreviewCard(documentPreviewVM)
                 }
             }
-            Button(modifier = Modifier.align(Alignment.CenterHorizontally), onClick = { filePickerLauncher.launch("*/*") }) {
+            Button(modifier = Modifier.align(Alignment.CenterHorizontally),
+                onClick = { filePickerLauncher.launch("*/*") }) {
                 Text("Select a File")
             }
         }

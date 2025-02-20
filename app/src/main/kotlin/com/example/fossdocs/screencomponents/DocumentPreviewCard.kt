@@ -13,8 +13,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
-import com.example.fossdocs.viewmodels.DocumentPreviewVM
 import com.example.fossdocs.R
+import com.example.fossdocs.viewmodels.DocumentPreviewVM
 
 
 /**
@@ -23,8 +23,7 @@ import com.example.fossdocs.R
 @Composable
 fun DocumentPreviewCard(doc: DocumentPreviewVM) {
     Column(
-        modifier = Modifier
-            .padding(8.dp)
+        modifier = Modifier.padding(8.dp)
     ) {
         doc.previewImageUri?.let {
             Image(
@@ -42,10 +41,12 @@ fun DocumentPreviewCard(doc: DocumentPreviewVM) {
             )
         }
 
-        Text(text = doc.title, modifier = Modifier
-            .padding(top = 4.dp),
+        Text(
+            text = doc.title,
+            modifier = Modifier.padding(top = 4.dp),
             maxLines = 2,
-            overflow = TextOverflow.Ellipsis)
+            overflow = TextOverflow.Ellipsis
+        )
     }
 }
 

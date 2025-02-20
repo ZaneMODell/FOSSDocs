@@ -1,4 +1,5 @@
 package com.example.fossdocs.viewmodels
+
 import android.net.Uri
 import androidx.annotation.DrawableRes
 import com.example.fossdocs.R
@@ -7,8 +8,7 @@ import com.example.fossdocs.R
  * View model for a document preview.
  */
 data class DocumentPreviewVM(
-    val title: String = "",
-    val previewImageUri: Uri? = null,  // For file-based images
+    val title: String = "", val previewImageUri: Uri? = null,  // For file-based images
     @DrawableRes val previewImageRes: Int? = null // For drawable resources
 )
 
