@@ -8,13 +8,14 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Button
@@ -94,17 +95,16 @@ fun MainScreen(modifier: Modifier = Modifier) {
                 }
             }
         }) { innerPadding ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-                    .padding(10.dp),
-                verticalArrangement = Arrangement.Center
-            ) {
-                Row {
-                    sampleDocs.forEach { documentPreviewVM ->
+            Column {
+                LazyVerticalStaggeredGrid(columns = StaggeredGridCells.Fixed(3),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(650.dp),
+                    contentPadding = innerPadding) {
+                    items(sampleDocs) { documentPreviewVM ->
                         DocumentPreviewCard(documentPreviewVM)
                     }
+
                 }
                 Button(modifier = Modifier.align(Alignment.CenterHorizontally),
                     onClick = { filePickerLauncher.launch("application/pdf") }) {
