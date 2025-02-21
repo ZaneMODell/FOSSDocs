@@ -83,7 +83,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
 
     //If we do not have a PDF or other file currently selected, we show a list of recent documents.
     if(fileUri == null){
-        Scaffold(modifier = Modifier.fillMaxSize(), snackbarHost = {
+        Scaffold(modifier = modifier, snackbarHost = {
             if (showSnackbar) {
                 Snackbar(action = {
                     TextButton(onClick = { showSnackbar = false }) {
@@ -116,7 +116,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
     //We show the PDF/other file type
     else {
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = modifier,
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
