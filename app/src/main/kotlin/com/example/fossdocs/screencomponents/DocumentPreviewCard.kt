@@ -12,6 +12,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil3.compose.rememberAsyncImagePainter
 import com.example.fossdocs.R
 import com.example.fossdocs.models.view.DocumentPreviewVM
@@ -43,9 +44,10 @@ fun DocumentPreviewCard(doc: DocumentPreviewVM) {
 
         Text(
             text = doc.title,
-            modifier = Modifier.padding(top = 4.dp),
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis
+            modifier = Modifier.padding(top = 4.dp).align(Alignment.CenterHorizontally),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            fontSize = 12.sp
         )
     }
 }

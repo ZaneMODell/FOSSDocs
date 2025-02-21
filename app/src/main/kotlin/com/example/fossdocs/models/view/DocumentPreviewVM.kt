@@ -17,6 +17,22 @@ val sampleDocs = listOf(
     DocumentPreviewVM("Sample Dog", previewImageRes = R.drawable.dog),
     DocumentPreviewVM("Sample Cat 2", previewImageRes = R.drawable.cat),
     DocumentPreviewVM("Sample Dog 2", previewImageRes = R.drawable.dog),
+    DocumentPreviewVM("Sample Cat", previewImageRes = R.drawable.cat),
+    DocumentPreviewVM("Sample Dog", previewImageRes = R.drawable.dog),
+    DocumentPreviewVM("Sample Cat 2", previewImageRes = R.drawable.cat),
+    DocumentPreviewVM("Sample Dog 2", previewImageRes = R.drawable.dog),
+    DocumentPreviewVM("Sample Cat", previewImageRes = R.drawable.cat),
+    DocumentPreviewVM("Sample Dog", previewImageRes = R.drawable.dog),
+    DocumentPreviewVM("Sample Cat 2", previewImageRes = R.drawable.cat),
+    DocumentPreviewVM("Sample Dog 2", previewImageRes = R.drawable.dog),
+    DocumentPreviewVM("Sample Cat", previewImageRes = R.drawable.cat),
+    DocumentPreviewVM("Sample Dog", previewImageRes = R.drawable.dog),
+    DocumentPreviewVM("Sample Cat 2", previewImageRes = R.drawable.cat),
+    DocumentPreviewVM("Sample Dog 2", previewImageRes = R.drawable.dog),
+    DocumentPreviewVM("Sample Cat", previewImageRes = R.drawable.cat),
+    DocumentPreviewVM("Sample Dog", previewImageRes = R.drawable.dog),
+    DocumentPreviewVM("Sample Cat 2", previewImageRes = R.drawable.cat),
+    DocumentPreviewVM("Sample Dog 2", previewImageRes = R.drawable.dog),
 //    DocumentPreviewVM("Local Image", previewImageUri = Uri.parse("content:/Internal storage/DCIM/Camera/20250209_193754.jpg"))
 )
 

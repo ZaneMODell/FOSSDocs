@@ -9,6 +9,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
@@ -96,7 +97,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
             }
         }) { innerPadding ->
             Column {
-                LazyVerticalStaggeredGrid(columns = StaggeredGridCells.Fixed(3),
+                LazyVerticalStaggeredGrid(columns = StaggeredGridCells.Adaptive(100.dp),
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(650.dp),
@@ -106,10 +107,17 @@ fun MainScreen(modifier: Modifier = Modifier) {
                     }
 
                 }
-                Button(modifier = Modifier.align(Alignment.CenterHorizontally),
-                    onClick = { filePickerLauncher.launch("application/pdf") }) {
-                    Text("Select a PDF")
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    Button(
+                        onClick = { filePickerLauncher.launch("application/pdf") }) {
+                        Text("Select a PDF")
+                    }
                 }
+
             }
         }
     }
