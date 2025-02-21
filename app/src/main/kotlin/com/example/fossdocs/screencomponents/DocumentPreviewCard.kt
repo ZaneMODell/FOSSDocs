@@ -14,7 +14,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.compose.rememberAsyncImagePainter
 import com.example.fossdocs.R
-import com.example.fossdocs.viewmodels.DocumentPreviewVM
+import com.example.fossdocs.models.view.DocumentPreviewVM
 
 
 /**

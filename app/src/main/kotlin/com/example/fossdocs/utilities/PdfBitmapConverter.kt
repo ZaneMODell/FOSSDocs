@@ -15,7 +15,7 @@ class PdfBitmapConverter(
     private val context: Context
 ) {
 
-    private var renderer: PdfRenderer? = null
+    var renderer: PdfRenderer? = null
 
     suspend fun pdfToBitmaps(contentUri: Uri): List<Bitmap> {
         return withContext(Dispatchers.IO) {
@@ -34,7 +34,7 @@ class PdfBitmapConverter(
                                     val bitmap = Bitmap.createBitmap(
                                         page.width, page.height, Bitmap.Config.ARGB_8888
                                     )
-                                    val canvas = Canvas(bitmap).apply {
+                                    Canvas(bitmap).apply {
                                         drawColor(Color.WHITE)
                                         drawBitmap(bitmap, 0f, 0f, null)
                                     }
