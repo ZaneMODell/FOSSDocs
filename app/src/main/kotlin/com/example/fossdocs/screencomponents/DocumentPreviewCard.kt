@@ -26,6 +26,7 @@ fun DocumentPreviewCard(doc: DocumentPreviewVM) {
     Column(
         modifier = Modifier.padding(8.dp)
     ) {
+        //TODO FIGURE OUT HOW REMEMBERASYNCPAINTER WORKS
         doc.previewImageUri?.let {
             Image(
                 painter = rememberAsyncImagePainter(it),
@@ -44,7 +45,9 @@ fun DocumentPreviewCard(doc: DocumentPreviewVM) {
 
         Text(
             text = doc.title,
-            modifier = Modifier.padding(top = 4.dp).align(Alignment.CenterHorizontally),
+            modifier = Modifier
+                .padding(top = 4.dp)
+                .align(Alignment.CenterHorizontally),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             fontSize = 12.sp

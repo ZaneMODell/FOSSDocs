@@ -5,6 +5,7 @@ import android.net.Uri
 import org.apache.poi.xwpf.extractor.XWPFWordExtractor
 import org.apache.poi.xwpf.usermodel.XWPFDocument
 
+//TODO FIGURE OUT HOW THIS WORKS AND IMPLEMENT IT
 object WordDocUtilities {
     fun extractTextFromWordFile(context: Context, uri: Uri): String {
         return context.contentResolver.openInputStream(uri)?.use { inputStream ->

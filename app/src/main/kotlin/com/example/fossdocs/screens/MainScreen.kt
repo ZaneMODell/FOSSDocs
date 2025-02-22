@@ -24,9 +24,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -65,9 +63,6 @@ fun MainScreen(modifier: Modifier = Modifier) {
     var fileUri by remember { mutableStateOf<Uri?>(null) }
     var renderedPages by remember { mutableStateOf(emptyList<Bitmap>()) }
     var searchResults by remember { mutableStateOf(emptyList<SearchResults>()) }
-    val selectedFileName by remember { mutableStateOf<String?>(null) }
-    val selectedMimeType by remember { mutableStateOf<String?>(null) }
-    var showSnackbar by remember { mutableStateOf(false) }
 
     val filePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -76,33 +71,25 @@ fun MainScreen(modifier: Modifier = Modifier) {
     }
 
     //This happens when the fileUri changes. This will change the rendered pages and recomposition will occur.
-    // Look more into LaunchedEffect to understand what it does.
+    //TODO Look more into LaunchedEffect to understand what it does.
     LaunchedEffect(key1 = fileUri) {
-        fileUri?.let { uri->
+        fileUri?.let { uri ->
             renderedPages = pdfBitmapConverter.pdfToBitmaps(uri)
         }
 
     }
 
     //If we do not have a PDF or other file currently selected, we show a list of recent documents.
-    if(fileUri == null){
-        Scaffold(modifier = modifier, snackbarHost = {
-            if (showSnackbar) {
-                Snackbar(action = {
-                    TextButton(onClick = { showSnackbar = false }) {
-                        Text("Dismiss")
-                    }
-                }) {
-                    Text("File: ${selectedFileName.orEmpty()}, Type: ${selectedMimeType.orEmpty()}")
-                }
-            }
-        }) { innerPadding ->
+    if (fileUri == null) {
+        Scaffold(modifier = modifier) { innerPadding ->
             Column {
-                LazyVerticalStaggeredGrid(columns = StaggeredGridCells.Adaptive(100.dp),
+                LazyVerticalStaggeredGrid(
+                    columns = StaggeredGridCells.Adaptive(100.dp),
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(650.dp),
-                    contentPadding = innerPadding) {
+                    contentPadding = innerPadding
+                ) {
                     items(sampleDocs) { documentPreviewVM ->
                         DocumentPreviewCard(documentPreviewVM)
                     }
@@ -113,8 +100,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
                     verticalArrangement = Arrangement.Center,
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    Button(
-                        onClick = { filePickerLauncher.launch("application/pdf") }) {
+                    Button(onClick = { filePickerLauncher.launch("application/pdf") }) {
                         Text("Select a PDF")
                     }
                 }
@@ -129,45 +115,49 @@ fun MainScreen(modifier: Modifier = Modifier) {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            LazyColumn(modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth())
-            {
-                itemsIndexed(renderedPages) {index, page ->
-                    PdfPage(page, modifier = modifier, searchResults = searchResults.find { it.page == index })
+            LazyColumn(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+            ) {
+                itemsIndexed(renderedPages) { index, page ->
+                    PdfPage(
+                        page,
+                        modifier = modifier,
+                        searchResults = searchResults.find { it.page == index })
                 }
             }
-            Button(onClick = {filePickerLauncher.launch("application/pdf")}) {
+            Button(onClick = { filePickerLauncher.launch("application/pdf") }) {
                 Text("Choose another PDF")
             }
+            //TODO FIGURE OUT HOW THIS IF BLOCK WORKS
             if (Build.VERSION.SDK_INT >= 35) {
                 val searchQuery = remember { mutableStateOf("") }
 
                 // Use snapshotFlow to debounce search input changes
                 LaunchedEffect(Unit) {
-                    snapshotFlow { searchQuery.value }
-                        .debounce(300) // Adjust debounce delay
+                    snapshotFlow { searchQuery.value }.debounce(300) // Adjust debounce delay
                         .distinctUntilChanged() // Prevent unnecessary recomputation
                         .filter { it.isNotBlank() } // Ignore empty searches
                         .collectLatest { query ->
                             pdfBitmapConverter.renderer?.let { renderer ->
                                 searchResults = withContext(Dispatchers.IO) {
-                                    (0 until renderer.pageCount).asSequence()
-                                        .mapNotNull { index ->
-                                            renderer.openPage(index).use { page ->
-                                                val results = page.searchText(query)
-                                                if (results.isNotEmpty()) {
-                                                    SearchResults(index, results.map { it.bounds.first() })
-                                                } else null
-                                            }
-                                        }.toList()
+                                    (0 until renderer.pageCount).asSequence().mapNotNull { index ->
+                                        renderer.openPage(index).use { page ->
+                                            val results = page.searchText(query)
+                                            if (results.isNotEmpty()) {
+                                                SearchResults(
+                                                    index,
+                                                    results.map { it.bounds.first() })
+                                            } else null
+                                        }
+                                    }.toList()
                                 }
                             }
                         }
                 }
 
-                OutlinedTextField(
-                    value = searchQuery.value,
+                OutlinedTextField(value = searchQuery.value,
                     modifier = Modifier.fillMaxWidth(),
                     trailingIcon = {
                         if (searchQuery.value.isNotEmpty()) {
@@ -175,13 +165,15 @@ fun MainScreen(modifier: Modifier = Modifier) {
                                 searchQuery.value = ""
                                 searchResults = emptyList()
                             }) {
-                                Icon(imageVector = Icons.Filled.Clear, contentDescription = "Clear search")
+                                Icon(
+                                    imageVector = Icons.Filled.Clear,
+                                    contentDescription = "Clear search"
+                                )
                             }
                         }
                     },
                     onValueChange = { newText -> searchQuery.value = newText },
-                    label = { Text("Search") }
-                )
+                    label = { Text("Search") })
             }
 
 
@@ -189,23 +181,27 @@ fun MainScreen(modifier: Modifier = Modifier) {
     }
 }
 
+/**
+ * Renders a single page of a PDF.
+ */
 @Composable
 fun PdfPage(
     page: Bitmap,
     modifier: Modifier = Modifier,
     searchResults: SearchResults? = null,
 ) {
-    AsyncImage(
-        model = page,
+    //TODO LOOK AT THIS CODE MORE TO FULLY UNDERSTAND IT
+    AsyncImage(model = page,
         contentDescription = null,
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier
+            .fillMaxWidth()
             .aspectRatio(page.width.toFloat() / page.height.toFloat())
-            .drawWithContent{
+            .drawWithContent {
                 drawContent()
 
                 val scaleFactorX = size.width / page.width
                 val scaleFactorY = size.height / page.height
-                searchResults?.results?.forEach{ rect->
+                searchResults?.results?.forEach { rect ->
                     val adjustedRect = RectF(
                         rect.left * scaleFactorX,
                         rect.top * scaleFactorY,
@@ -215,18 +211,12 @@ fun PdfPage(
                     )
 
                     drawRoundRect(
-                        color = Color.Yellow.copy(alpha = 0.5f),
-                        topLeft = Offset(
-                            x = adjustedRect.left,
-                            y = adjustedRect.top
-                        ),
-                        size = Size(
-                            width = adjustedRect.width(),
-                            height = adjustedRect.height()
-                        ),
-                        cornerRadius = CornerRadius(5.dp.toPx())
+                        color = Color.Yellow.copy(alpha = 0.5f), topLeft = Offset(
+                            x = adjustedRect.left, y = adjustedRect.top
+                        ), size = Size(
+                            width = adjustedRect.width(), height = adjustedRect.height()
+                        ), cornerRadius = CornerRadius(5.dp.toPx())
                     )
                 }
-            }
-    )
+            })
 }
