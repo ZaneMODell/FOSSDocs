@@ -32,8 +32,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
@@ -49,7 +49,11 @@ import com.example.fossdocs.models.view.sampleDocs
 import com.example.fossdocs.screencomponents.DocumentPreviewCard
 import com.example.fossdocs.utilities.PdfBitmapConverter
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.withContext
 
 /**
  * Main screen of the app, shows a list of recent documents and a button to select a file.
@@ -60,7 +64,6 @@ fun MainScreen(modifier: Modifier = Modifier) {
     val pdfBitmapConverter = remember { PdfBitmapConverter(context) }
     var fileUri by remember { mutableStateOf<Uri?>(null) }
     var renderedPages by remember { mutableStateOf(emptyList<Bitmap>()) }
-    var searchText by remember { mutableStateOf("") }
     var searchResults by remember { mutableStateOf(emptyList<SearchResults>()) }
     val selectedFileName by remember { mutableStateOf<String?>(null) }
     val selectedMimeType by remember { mutableStateOf<String?>(null) }
@@ -71,8 +74,6 @@ fun MainScreen(modifier: Modifier = Modifier) {
     ) { uri: Uri? ->
         fileUri = uri
     }
-
-    val scope = rememberCoroutineScope()
 
     //This happens when the fileUri changes. This will change the rendered pages and recomposition will occur.
     // Look more into LaunchedEffect to understand what it does.
@@ -139,62 +140,54 @@ fun MainScreen(modifier: Modifier = Modifier) {
             Button(onClick = {filePickerLauncher.launch("application/pdf")}) {
                 Text("Choose another PDF")
             }
-            if(Build.VERSION.SDK_INT >= 35) {
+            if (Build.VERSION.SDK_INT >= 35) {
+                val searchQuery = remember { mutableStateOf("") }
+
+                // Use snapshotFlow to debounce search input changes
+                LaunchedEffect(Unit) {
+                    snapshotFlow { searchQuery.value }
+                        .debounce(300) // Adjust debounce delay
+                        .distinctUntilChanged() // Prevent unnecessary recomputation
+                        .filter { it.isNotBlank() } // Ignore empty searches
+                        .collectLatest { query ->
+                            pdfBitmapConverter.renderer?.let { renderer ->
+                                searchResults = withContext(Dispatchers.IO) {
+                                    (0 until renderer.pageCount).asSequence()
+                                        .mapNotNull { index ->
+                                            renderer.openPage(index).use { page ->
+                                                val results = page.searchText(query)
+                                                if (results.isNotEmpty()) {
+                                                    SearchResults(index, results.map { it.bounds.first() })
+                                                } else null
+                                            }
+                                        }.toList()
+                                }
+                            }
+                        }
+                }
+
                 OutlinedTextField(
-                    value = searchText,
+                    value = searchQuery.value,
                     modifier = Modifier.fillMaxWidth(),
                     trailingIcon = {
-                        if (searchText.isNotEmpty()) {
+                        if (searchQuery.value.isNotEmpty()) {
                             IconButton(onClick = {
-                                searchText = ""
+                                searchQuery.value = ""
                                 searchResults = emptyList()
                             }) {
                                 Icon(imageVector = Icons.Filled.Clear, contentDescription = "Clear search")
                             }
                         }
                     },
-                    onValueChange ={
-                        newSearchText ->
-                        searchText = newSearchText
-                        pdfBitmapConverter.renderer?.let { renderer ->
-                            scope.launch(Dispatchers.Default) {
-                                searchResults = (0 until renderer.pageCount).map { index ->
-                                    renderer.openPage(index).use { page ->
-                                        val results = page.searchText(searchText)
-
-                                        val matchedRects = results.map { result ->
-                                            result.bounds.first()
-                                        }
-
-                                        SearchResults(index, matchedRects)
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    label = {
-                        Text("Search")
-                    }
+                    onValueChange = { newText -> searchQuery.value = newText },
+                    label = { Text("Search") }
                 )
             }
+
+
         }
     }
 }
-
-
-///**
-// * Helper function to get the file name from a URI.
-// *
-// * @param contentResolver The ContentResolver to use for querying the URI.
-// */
-//fun getFileName(contentResolver: ContentResolver, uri: Uri): String {
-//    val cursor: Cursor? = contentResolver.query(uri, null, null, null, null)
-//    return cursor?.use {
-//        val nameIndex = it.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-//        it.moveToFirst()
-//        it.getString(nameIndex)
-//    } ?: "Unknown"
-//}
 
 @Composable
 fun PdfPage(
