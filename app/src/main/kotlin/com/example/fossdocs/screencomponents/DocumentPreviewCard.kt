@@ -26,7 +26,6 @@ fun DocumentPreviewCard(doc: DocumentPreviewVM) {
     Column(
         modifier = Modifier.padding(8.dp)
     ) {
-        //TODO FIGURE OUT HOW REMEMBERASYNCPAINTER WORKS
         doc.previewImageUri?.let {
             Image(
                 painter = rememberAsyncImagePainter(it),

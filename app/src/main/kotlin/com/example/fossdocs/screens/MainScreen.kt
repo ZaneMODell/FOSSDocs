@@ -47,15 +47,16 @@ import com.example.fossdocs.models.view.sampleDocs
 import com.example.fossdocs.screencomponents.DocumentPreviewCard
 import com.example.fossdocs.utilities.PdfBitmapConverter
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.withContext
 
 /**
  * Main screen of the app, shows a list of recent documents and a button to select a file.
  */
+@OptIn(FlowPreview::class)
 @Composable
 fun MainScreen(modifier: Modifier = Modifier) {
     val context = LocalContext.current
@@ -71,7 +72,6 @@ fun MainScreen(modifier: Modifier = Modifier) {
     }
 
     //This happens when the fileUri changes. This will change the rendered pages and recomposition will occur.
-    //TODO Look more into LaunchedEffect to understand what it does.
     LaunchedEffect(key1 = fileUri) {
         fileUri?.let { uri ->
             renderedPages = pdfBitmapConverter.pdfToBitmaps(uri)
@@ -104,7 +104,6 @@ fun MainScreen(modifier: Modifier = Modifier) {
                         Text("Select a PDF")
                     }
                 }
-
             }
         }
     }
@@ -130,15 +129,13 @@ fun MainScreen(modifier: Modifier = Modifier) {
             Button(onClick = { filePickerLauncher.launch("application/pdf") }) {
                 Text("Choose another PDF")
             }
-            //TODO FIGURE OUT HOW THIS IF BLOCK WORKS
+
             if (Build.VERSION.SDK_INT >= 35) {
                 val searchQuery = remember { mutableStateOf("") }
-
                 // Use snapshotFlow to debounce search input changes
                 LaunchedEffect(Unit) {
                     snapshotFlow { searchQuery.value }.debounce(300) // Adjust debounce delay
                         .distinctUntilChanged() // Prevent unnecessary recomputation
-                        .filter { it.isNotBlank() } // Ignore empty searches
                         .collectLatest { query ->
                             pdfBitmapConverter.renderer?.let { renderer ->
                                 searchResults = withContext(Dispatchers.IO) {
@@ -175,8 +172,6 @@ fun MainScreen(modifier: Modifier = Modifier) {
                     onValueChange = { newText -> searchQuery.value = newText },
                     label = { Text("Search") })
             }
-
-
         }
     }
 }

@@ -6,6 +6,7 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.pdf.PdfRenderer
 import android.net.Uri
+import androidx.core.graphics.createBitmap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -36,9 +37,7 @@ class PdfBitmapConverter(
                     return@withContext (0 until pageCount).map { index ->
                         async {
                             openPage(index).use { page ->
-                                val bitmap = Bitmap.createBitmap(
-                                    page.width, page.height, Bitmap.Config.ARGB_8888
-                                )
+                                val bitmap = createBitmap(page.width, page.height)
                                 Canvas(bitmap).apply {
                                     drawColor(Color.WHITE)
                                     drawBitmap(bitmap, 0f, 0f, null)
