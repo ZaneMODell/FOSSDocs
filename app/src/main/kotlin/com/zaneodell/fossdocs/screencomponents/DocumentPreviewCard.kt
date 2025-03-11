@@ -1,4 +1,4 @@
-package com.example.fossdocs.screencomponents
+package com.zaneodell.fossdocs.screencomponents
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.rememberAsyncImagePainter
 import com.example.fossdocs.R
-import com.example.fossdocs.models.view.DocumentPreviewVM
+import com.zaneodell.fossdocs.models.view.DocumentPreviewVM
 
 
 /**
@@ -24,7 +24,7 @@ import com.example.fossdocs.models.view.DocumentPreviewVM
 @Composable
 fun DocumentPreviewCard(doc: DocumentPreviewVM) {
     Column(
-        modifier = Modifier.padding(8.dp)
+        modifier = Modifier.padding(6.dp)
     ) {
         doc.previewImageUri?.let {
             Image(

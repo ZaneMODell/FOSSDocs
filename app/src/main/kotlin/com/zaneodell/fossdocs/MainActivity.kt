@@ -1,4 +1,4 @@
-package com.example.fossdocs
+package com.zaneodell.fossdocs
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -8,8 +8,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
-import com.example.fossdocs.screens.MainScreen
-import com.example.fossdocs.ui.theme.FOSSDocsTheme
+import com.zaneodell.fossdocs.screens.MainScreen
+import com.zaneodell.fossdocs.ui.theme.FOSSDocsTheme
 
 /**
  * Entry point of the app.

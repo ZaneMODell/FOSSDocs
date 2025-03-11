@@ -1,4 +1,4 @@
-package com.example.fossdocs.models.view
+package com.zaneodell.fossdocs.models.view
 
 import android.net.Uri
 import androidx.annotation.DrawableRes

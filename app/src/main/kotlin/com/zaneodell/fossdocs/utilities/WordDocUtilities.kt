@@ -1,4 +1,4 @@
-package com.example.fossdocs.utilities
+package com.zaneodell.fossdocs.utilities
 
 import android.content.Context
 import android.net.Uri

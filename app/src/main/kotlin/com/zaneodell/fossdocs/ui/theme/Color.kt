@@ -1,4 +1,4 @@
-package com.example.fossdocs.ui.theme
+package com.zaneodell.fossdocs.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

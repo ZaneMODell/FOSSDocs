@@ -1,5 +1,6 @@
-package com.example.fossdocs.screens
+package com.zaneodell.fossdocs.screens
 
+import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
@@ -43,14 +44,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.example.fossdocs.models.data.SearchResults
-import com.example.fossdocs.models.view.sampleDocs
-import com.example.fossdocs.screencomponents.DocumentPreviewCard
-import com.example.fossdocs.screencomponents.PdfPage
-import com.example.fossdocs.utilities.PdfBitmapConverter
+import com.zaneodell.fossdocs.models.data.SearchResults
+import com.zaneodell.fossdocs.models.view.sampleDocs
+import com.zaneodell.fossdocs.screencomponents.DocumentPreviewCard
+import com.zaneodell.fossdocs.screencomponents.PdfPage
+import com.zaneodell.fossdocs.utilities.DeviceUtils
+import com.zaneodell.fossdocs.utilities.PdfBitmapConverter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
@@ -61,6 +62,7 @@ import kotlinx.coroutines.withContext
 /**
  * Main screen of the app, shows a list of recent documents and a button to select a file.
  */
+@SuppressLint("UnusedBoxWithConstraintsScope")
 @OptIn(FlowPreview::class)
 @Composable
 fun MainScreen(modifier: Modifier = Modifier) {
@@ -119,8 +121,9 @@ fun MainScreen(modifier: Modifier = Modifier) {
     //We show the PDF/other file type
     else {
         BoxWithConstraints(
-            modifier = Modifier.fillMaxWidth()
-                .aspectRatio(getDeviceAspectRatio())
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(DeviceUtils.getDeviceAspectRatio())
         ) {
             val state = rememberTransformableState { zoomChange, panChange, rotationChange ->
                 scale = (scale * zoomChange).coerceIn(1f, 5f)
@@ -138,17 +141,16 @@ fun MainScreen(modifier: Modifier = Modifier) {
                 )
             }
 
-            Column(
-                modifier = modifier.graphicsLayer {
+            Column(modifier = modifier
+                .graphicsLayer {
                     scaleX = scale
                     scaleY = scale
                     translationX = offset.x
                     translationY = offset.y
                 }
-                    .transformable(state),
+                .transformable(state),
                 verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
+                horizontalAlignment = Alignment.CenterHorizontally) {
                 LazyColumn(
                     modifier = Modifier
                         .weight(1f)
@@ -164,7 +166,8 @@ fun MainScreen(modifier: Modifier = Modifier) {
 
             }
             Row(
-                modifier= Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
                     .align(Alignment.BottomCenter)
                     .padding(15.dp),
             ) {
@@ -180,27 +183,31 @@ fun MainScreen(modifier: Modifier = Modifier) {
                         // Use snapshotFlow to debounce search input changes
                         LaunchedEffect(Unit) {
                             snapshotFlow { searchQuery.value }.debounce(300) // Adjust debounce delay
-                                .distinctUntilChanged() // Prevent unnecessary recomputation
+                                .distinctUntilChanged() // Prevent unnecessary re-computation
                                 .collectLatest { query ->
                                     pdfBitmapConverter.renderer?.let { renderer ->
                                         searchResults = withContext(Dispatchers.IO) {
-                                            (0 until renderer.pageCount).asSequence().mapNotNull { index ->
-                                                renderer.openPage(index).use { page ->
-                                                    val results = page.searchText(query)
-                                                    if (results.isNotEmpty()) {
-                                                        SearchResults(
-                                                            index,
-                                                            results.map { it.bounds.first() })
-                                                    } else null
-                                                }
-                                            }.toList()
+                                            (0 until renderer.pageCount).asSequence()
+                                                .mapNotNull { index ->
+                                                    renderer.openPage(index).use { page ->
+                                                        val results = page.searchText(query)
+                                                        if (results.isNotEmpty()) {
+                                                            SearchResults(
+                                                                index,
+                                                                results.map { it.bounds.first() })
+                                                        } else null
+                                                    }
+                                                }.toList()
                                         }
                                     }
                                 }
                         }
 
-                        OutlinedTextField(value = searchQuery.value,
-                            modifier = Modifier.fillMaxWidth().background(Color.Black),
+                        OutlinedTextField(
+                            value = searchQuery.value,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(Color.Black),
                             trailingIcon = {
                                 if (searchQuery.value.isNotEmpty()) {
                                     IconButton(onClick = {
@@ -223,10 +230,4 @@ fun MainScreen(modifier: Modifier = Modifier) {
     }
 }
 
-@Composable
-fun getDeviceAspectRatio(): Float {
-    val configuration = LocalConfiguration.current
-    val screenWidth = configuration.screenWidthDp
-    val screenHeight = configuration.screenHeightDp
-    return screenWidth.toFloat() / screenHeight.toFloat()
-}
+

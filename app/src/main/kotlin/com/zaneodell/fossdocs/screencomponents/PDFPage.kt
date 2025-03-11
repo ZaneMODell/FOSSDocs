@@ -1,4 +1,4 @@
-package com.example.fossdocs.screencomponents
+package com.zaneodell.fossdocs.screencomponents
 
 import android.graphics.Bitmap
 import android.graphics.RectF
@@ -13,7 +13,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-import com.example.fossdocs.models.data.SearchResults
+import com.zaneodell.fossdocs.models.data.SearchResults
 
 /**
  * Renders a single page of a PDF.
@@ -24,7 +24,9 @@ fun PdfPage(
     modifier: Modifier = Modifier,
     searchResults: SearchResults? = null,
 ) {
-    AsyncImage(model = page,
+    //Allows the fetching of an image asynchronously as to not block main thread
+    AsyncImage(
+        model = page,
         contentDescription = null,
         modifier = modifier
             .fillMaxWidth()
@@ -42,7 +44,7 @@ fun PdfPage(
                         rect.bottom * scaleFactorY
 
                     )
-
+                    //This is for all of the search results within a PDF file.
                     drawRoundRect(
                         color = Color.Yellow.copy(alpha = 0.5f), topLeft = Offset(
                             x = adjustedRect.left, y = adjustedRect.top
