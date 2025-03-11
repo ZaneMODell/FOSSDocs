@@ -125,14 +125,23 @@ fun MainScreen(modifier: Modifier = Modifier) {
                 .fillMaxWidth()
                 .aspectRatio(DeviceUtils.getDeviceAspectRatio())
         ) {
-            val state = rememberTransformableState { zoomChange, panChange, rotationChange ->
-                scale = (scale * zoomChange).coerceIn(1f, 5f)
+            var sensitivity by remember { mutableFloatStateOf(2f) } // Adjust this value (1 = normal)
 
-                val extraWith = (scale - 1) * constraints.maxWidth
+            val state = rememberTransformableState { zoomChange, panChange, _ ->
+                // Modified zoom calculation with sensitivity
+                val adjustedZoom = if (zoomChange < 1) {
+                    // Apply different sensitivity for zoom-out gestures
+                    1 - (1 - zoomChange) * sensitivity * 0.75f
+                } else {
+                    1 + (zoomChange - 1) * sensitivity
+                }
+
+                scale = (scale * adjustedZoom)
+                    .coerceIn(1f, 5f)
+
+                val extraWidth = (scale - 1) * constraints.maxWidth
                 val extraHeight = (scale - 1) * constraints.maxHeight
-
-                val maxX = extraWith / 2
-
+                val maxX = extraWidth / 2
                 val maxY = extraHeight / 2
 
                 offset = Offset(
