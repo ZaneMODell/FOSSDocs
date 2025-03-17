@@ -5,6 +5,8 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -38,6 +40,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -59,11 +62,8 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.withContext
-import android.webkit.WebView
-import android.webkit.WebViewClient
-import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * Main screen of the app, shows a list of recent documents and a button to select a file.
@@ -104,6 +104,7 @@ fun MainScreen(
                     isWordDoc = false
                     renderedPages = pdfBitmapConverter.pdfToBitmaps(uri)
                 }
+
                 "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document" -> {
                     isWordDoc = true
                     scope.launch {
@@ -134,7 +135,15 @@ fun MainScreen(
                     verticalArrangement = Arrangement.Center,
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    Button(onClick = { filePickerLauncher.launch(arrayOf("application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document")) }) {
+                    Button(onClick = {
+                        filePickerLauncher.launch(
+                            arrayOf(
+                                "application/pdf",
+                                "application/msword",
+                                "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                            )
+                        )
+                    }) {
                         Text("Select a Document")
                     }
                 }
@@ -170,18 +179,16 @@ fun MainScreen(
                 )
             }
 
-            Column(
-                modifier = modifier
-                    .graphicsLayer {
-                        scaleX = scale
-                        scaleY = scale
-                        translationX = offset.x
-                        translationY = offset.y
-                    }
-                    .transformable(state),
+            Column(modifier = modifier
+                .graphicsLayer {
+                    scaleX = scale
+                    scaleY = scale
+                    translationX = offset.x
+                    translationY = offset.y
+                }
+                .transformable(state),
                 verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
+                horizontalAlignment = Alignment.CenterHorizontally) {
                 if (isWordDoc) {
                     // Render Word document
                     wordContent?.let { html ->
@@ -198,8 +205,7 @@ fun MainScreen(
                             PdfPage(
                                 page,
                                 modifier = modifier,
-                                searchResults = searchResults.find { it.page == index }
-                            )
+                                searchResults = searchResults.find { it.page == index })
                         }
                     }
                 }
@@ -214,16 +220,22 @@ fun MainScreen(
                 Column {
                     Button(
                         modifier = Modifier.align(Alignment.CenterHorizontally),
-                        onClick = { filePickerLauncher.launch(arrayOf("application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document")) }
-                    ) {
+                        onClick = {
+                            filePickerLauncher.launch(
+                                arrayOf(
+                                    "application/pdf",
+                                    "application/msword",
+                                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                                )
+                            )
+                        }) {
                         Text("Choose another Document")
                     }
-
+                    //Version check for PDF searching
                     if (Build.VERSION.SDK_INT >= 35 && !isWordDoc) {
                         val searchQuery = remember { mutableStateOf("") }
                         LaunchedEffect(Unit) {
-                            snapshotFlow { searchQuery.value }.debounce(300)
-                                .distinctUntilChanged()
+                            snapshotFlow { searchQuery.value }.debounce(300).distinctUntilChanged()
                                 .collectLatest { query ->
                                     pdfBitmapConverter.renderer?.let { renderer ->
                                         searchResults = withContext(Dispatchers.IO) {
@@ -262,8 +274,7 @@ fun MainScreen(
                                 }
                             },
                             onValueChange = { newText -> searchQuery.value = newText },
-                            label = { Text("Search") }
-                        )
+                            label = { Text("Search") })
                     }
                 }
             }
@@ -283,15 +294,10 @@ fun WordDocumentView(htmlContent: String) {
                 settings.javaScriptEnabled = true
                 webViewClient = WebViewClient()
                 loadDataWithBaseURL(
-                    null,
-                    htmlContent,
-                    "text/html",
-                    "UTF-8",
-                    null
+                    null, htmlContent, "text/html", "UTF-8", null
                 )
             }
-        }
-    )
+        })
 }
 
 /**

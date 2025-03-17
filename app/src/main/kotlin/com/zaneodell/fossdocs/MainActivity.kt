@@ -21,6 +21,11 @@ import com.zaneodell.fossdocs.ui.theme.FOSSDocsTheme
  * Entry point of the app.
  */
 class MainActivity : ComponentActivity() {
+    /**
+     * Called when the activity is first created.
+     *
+     * @param savedInstanceState current state of the application
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -34,14 +39,18 @@ class MainActivity : ComponentActivity() {
                 var localFileUri by remember { mutableStateOf(fileUri) }
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     MainScreen(
-                        fileUri = localFileUri,
-                        modifier = Modifier.padding(innerPadding)
+                        fileUri = localFileUri, modifier = Modifier.padding(innerPadding)
                     )
                 }
             }
         }
     }
 
+    /**
+     * Function that handles new intents, specifically for opening documents in this app
+     * outside of the app.
+     * @param intent The new intent that triggered this function.
+     */
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         // Handle new intents (e.g., if the user opens another file while the app is already running)
@@ -52,8 +61,7 @@ class MainActivity : ComponentActivity() {
                     var localFileUri by remember { mutableStateOf(fileUri) }
                     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                         MainScreen(
-                            fileUri = localFileUri,
-                            modifier = Modifier.padding(innerPadding)
+                            fileUri = localFileUri, modifier = Modifier.padding(innerPadding)
                         )
                     }
                 }
@@ -61,6 +69,11 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    /**
+     * Function that processes the intent and returns the URI if it's a supported file type.
+     *
+     * @param intent The intent to process.
+     */
     private fun handleIntent(intent: Intent): Uri? {
         return when (intent.action) {
             Intent.ACTION_VIEW -> {
@@ -71,16 +84,20 @@ class MainActivity : ComponentActivity() {
                     null
                 }
             }
+
             else -> null
         }
     }
 
+    /**
+     * Takes in a URI and returns true if it's a supported file type.
+     *
+     * @param uri The URI to check.
+     */
     private fun isSupportedFileType(uri: Uri): Boolean {
         val mimeType = contentResolver.getType(uri)
         return when (mimeType) {
-            "application/pdf",
-            "application/msword",
-            "application/vnd.openxmlformats-officedocument.wordprocessingml.document" -> true
+            "application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document" -> true
             else -> false
         }
     }
