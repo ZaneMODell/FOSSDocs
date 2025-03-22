@@ -8,14 +8,25 @@ android {
     namespace = "com.example.fossdocs"
     compileSdk = 35
 
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+        }
+    }
+
     defaultConfig {
         applicationId = "com.example.fossdocs"
         minSdk = 28
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    sourceSets {
+        getByName("test") {
+            resources.srcDirs("src/test/resources")
+        }
     }
 
     buildTypes {
@@ -53,10 +64,14 @@ dependencies {
     implementation(libs.poi) // For .doc support
     implementation(libs.poi.ooxml) // For .docx support
     testImplementation(libs.junit)
+    testImplementation (libs.robolectric)
+    testImplementation (libs.mockito.mockito.core)
+    testImplementation (libs.androidx.core)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    testImplementation(kotlin("test"))
 }
