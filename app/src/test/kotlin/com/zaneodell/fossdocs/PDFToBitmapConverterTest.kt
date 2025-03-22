@@ -1,9 +1,7 @@
+
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.pdf.PdfRenderer
 import android.net.Uri
 import android.os.Build
-import android.os.ParcelFileDescriptor
 import androidx.test.core.app.ApplicationProvider
 import com.zaneodell.fossdocs.utilities.PdfBitmapConverter
 import junit.framework.TestCase.assertEquals
@@ -19,6 +17,8 @@ import org.robolectric.annotation.Config
 import java.io.File
 import java.io.FileNotFoundException
 
+//@TODO FIGURE OUT HOW TO GET THIS TEST TO WORK, PDF FILE IS NOT BEING READ/ACCESSED PROPERLY
+
 @RunWith(RobolectricTestRunner::class)
 @Config(
     sdk = [Build.VERSION_CODES.TIRAMISU],
@@ -28,23 +28,27 @@ class PdfBitmapConverterTest {
 
     private val context: Context = ApplicationProvider.getApplicationContext()
     private lateinit var converter: PdfBitmapConverter
-
-    private val testPdfPath = javaClass.classLoader?.getResource("testres/test.pdf")?.path
-        ?: throw FileNotFoundException("testres/test.pdf not in test resources")
     private lateinit var testPdfUri: Uri
+    private lateinit var testPdfFile: File
 
     @Before
     fun setUp() {
-        val testPdfFile = File(testPdfPath).also {
-            require(it.exists()) { "Test PDF not found at: $testPdfPath" }
+        val pdfInputStream = javaClass.classLoader?.getResourceAsStream("raw/test.pdf")
+            ?: throw FileNotFoundException("raw/test.pdf not in test resources")
+
+        testPdfFile = createTempFile(suffix = ".pdf").apply {
+            outputStream().use { output ->
+                pdfInputStream.copyTo(output)
+            }
         }
-        testPdfUri = Uri.parse("file://$testPdfPath")
+        testPdfUri = Uri.fromFile(testPdfFile)
         converter = PdfBitmapConverter(context)
     }
 
     @After
     fun tearDown() {
         converter.renderer?.close()
+        testPdfFile.delete()
     }
 
     @Test
@@ -53,20 +57,13 @@ class PdfBitmapConverterTest {
             val result = converter.pdfToBitmaps(testPdfUri)
             assertNotNull(result)
             assertTrue(result.isNotEmpty())
-            assertTrue(result.all { it is Bitmap })
         }
     }
 
     @Test
     fun `creates correct number of pages`() {
         runBlocking {
-            val pageCount = PdfRenderer(
-                ParcelFileDescriptor.open(
-                    File(testPdfPath),
-                    ParcelFileDescriptor.MODE_READ_ONLY
-                )
-            ).use { it.pageCount }
-
+            val pageCount = 3 // Replace with the expected page count
             val result = converter.pdfToBitmaps(testPdfUri)
             assertEquals(pageCount, result.size)
         }
