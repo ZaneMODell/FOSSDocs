@@ -26,6 +26,7 @@ android {
     sourceSets {
         getByName("test") {
             resources.srcDirs("src/test/resources")
+            assets.srcDirs("src/test/assets")
         }
     }
 
