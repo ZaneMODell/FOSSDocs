@@ -13,6 +13,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.rememberTransformableState
 import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -29,6 +30,7 @@ import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -80,6 +82,7 @@ fun MainScreen(
     var localFileUri by remember { mutableStateOf(fileUri) }
     var renderedPages by remember { mutableStateOf(emptyList<Bitmap>()) }
     var searchResults by remember { mutableStateOf(emptyList<SearchResults>()) }
+    var isLoading by remember { mutableStateOf(false) }
     var isWordDoc by remember { mutableStateOf(false) } // Track if the file is a Word document
     var wordContent by remember { mutableStateOf<String?>(null) } // Store Word document HTML content
     val scope = rememberCoroutineScope()
@@ -101,14 +104,18 @@ fun MainScreen(
         localFileUri?.let { uri ->
             when (context.contentResolver.getType(uri)) {
                 "application/pdf" -> {
+                    isLoading = true
                     isWordDoc = false
                     renderedPages = pdfBitmapConverter.pdfToBitmaps(uri)
+                    isLoading = false
                 }
 
                 "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document" -> {
+                    isLoading = true
                     isWordDoc = true
                     scope.launch {
                         wordContent = convertWordToHtml(context, uri)
+                        isLoading = false
                     }
                 }
             }
@@ -189,26 +196,38 @@ fun MainScreen(
                 .transformable(state),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally) {
-                if (isWordDoc) {
-                    // Render Word document
-                    wordContent?.let { html ->
-                        WordDocumentView(htmlContent = html)
+                if (isLoading) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Black.copy(alpha = 0.5f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(color = Color.White)
                     }
                 } else {
-                    // Render PDF
-                    LazyColumn(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth()
-                    ) {
-                        itemsIndexed(renderedPages) { index, page ->
-                            PdfPage(
-                                page,
-                                modifier = modifier,
-                                searchResults = searchResults.find { it.page == index })
+                    if (isWordDoc) {
+                        // Render Word document
+                        wordContent?.let { html ->
+                            WordDocumentView(htmlContent = html)
+                        }
+                    } else {
+                        // Render PDF
+                        LazyColumn(
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxWidth()
+                        ) {
+                            itemsIndexed(renderedPages) { index, page ->
+                                PdfPage(
+                                    page,
+                                    modifier = modifier,
+                                    searchResults = searchResults.find { it.page == index })
+                            }
                         }
                     }
                 }
+
             }
 
             Row(
@@ -219,8 +238,7 @@ fun MainScreen(
             ) {
                 Column {
                     Button(
-                        modifier = Modifier.align(Alignment.CenterHorizontally),
-                        onClick = {
+                        modifier = Modifier.align(Alignment.CenterHorizontally), onClick = {
                             filePickerLauncher.launch(
                                 arrayOf(
                                     "application/pdf",
