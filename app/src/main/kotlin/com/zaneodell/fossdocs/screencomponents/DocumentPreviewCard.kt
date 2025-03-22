@@ -63,7 +63,7 @@ fun DocumentPreviewPreview() {
     DocumentPreviewCard(
         doc = DocumentPreviewVM(
             title = "Sample Document",
-            previewImageRes = R.drawable.cat // Replace with your drawable
+            previewImageRes = R.mipmap.cat // Replace with your drawable
         )
     )
 }
