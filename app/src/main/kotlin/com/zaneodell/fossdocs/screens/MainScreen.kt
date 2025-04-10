@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -28,9 +29,11 @@ import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -53,6 +56,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import coil3.util.Logger
 import com.zaneodell.fossdocs.models.data.SearchResults
 import com.zaneodell.fossdocs.models.view.sampleDocs
 import com.zaneodell.fossdocs.screencomponents.DocumentPreviewCard
@@ -90,6 +94,9 @@ fun MainScreen(
     var scale by remember { mutableFloatStateOf(1f) }
     var offset by remember { mutableStateOf(Offset.Zero) }
 
+    //TODO CHANGE THIS AND ALL LOGIC WITH IT ONCE LOCAL DB STORAGE IS IMPLEMENTED
+    var arePreviousDocs by remember { mutableStateOf(false) }
+
     // File picker launcher for PDF and Word files
     val filePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument()
@@ -114,7 +121,8 @@ fun MainScreen(
                     isLoading = true
                     isWordDoc = true
                     scope.launch {
-                        wordContent = convertWordToHtml(context, uri)
+//                        wordContent = convertWordToHtml(context, uri)
+                        print("IS WORD DOC")
                         isLoading = false
                     }
                 }
@@ -123,7 +131,7 @@ fun MainScreen(
     }
 
     // If no file is selected, show the default screen
-    if (localFileUri == null) {
+    if (arePreviousDocs && (localFileUri == null)) {
         Scaffold(modifier = modifier) { innerPadding ->
             Column {
                 LazyVerticalStaggeredGrid(
@@ -150,12 +158,37 @@ fun MainScreen(
                                 "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                             )
                         )
+                        arePreviousDocs = true
                     }) {
                         Text("Select a Document")
                     }
                 }
             }
         }
+    }
+    else if (!arePreviousDocs){
+        Column(
+            modifier = Modifier.fillMaxSize()
+                .padding(5.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
+            FloatingActionButton(onClick = {
+                filePickerLauncher.launch(
+                    arrayOf(
+                        "application/pdf",
+                        "application/msword",
+                        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                    )
+                )
+                arePreviousDocs = true
+            }) {
+                Icon(Icons.Filled.AddCircle, "Floating Action Button")
+            }
+            Spacer(Modifier.padding(10.dp))
+            Text("Select A Document")
+        }
+
     }
     // Show the selected file (PDF or Word)
     else {
@@ -208,9 +241,10 @@ fun MainScreen(
                 } else {
                     if (isWordDoc) {
                         // Render Word document
-                        wordContent?.let { html ->
-                            WordDocumentView(htmlContent = html)
-                        }
+//                        wordContent?.let { html ->
+//                            WordDocumentView(htmlContent = html)
+//                        }
+                        print("IS WORD DOC")
                     } else {
                         // Render PDF
                         LazyColumn(
@@ -300,63 +334,63 @@ fun MainScreen(
     }
 }
 
-/**
- * Renders a Word document as HTML in a WebView.
- */
-@Composable
-fun WordDocumentView(htmlContent: String) {
-    AndroidView(
-        factory = { context ->
-            WebView(context).apply {
-                //TODO LOOK INTO THIS AS TO NOT INTRODUCE VULNERABILITIES
-                settings.javaScriptEnabled = true
-                webViewClient = WebViewClient()
-                loadDataWithBaseURL(
-                    null, htmlContent, "text/html", "UTF-8", null
-                )
-            }
-        })
-}
-
-/**
- * Converts a Word document to HTML.
- */
-private suspend fun convertWordToHtml(context: Context, uri: Uri): String {
-    return try {
-        val inputStream = context.contentResolver.openInputStream(uri)
-        val bytes = inputStream?.readBytes() ?: byteArrayOf()
-        val base64 = android.util.Base64.encodeToString(bytes, android.util.Base64.DEFAULT)
-        """
-        <html>
-            <head>
-                <script src="file:///android_asset/js/mammoth.browser.min.js"></script>
-                <style>
-                    body { font-family: sans-serif; line-height: 1.6; padding: 20px }
-                    table { border-collapse: collapse; width: 100% }
-                    td, th { border: 1px solid #ddd; padding: 8px }
-                    img { max-width: 100% }
-                </style>
-            </head>
-            <body>
-                <div id="content"></div>
-                <script>
-                    const base64 = "$base64";
-                    const raw = atob(base64);
-                    const array = new Uint8Array(raw.length);
-                    for (let i = 0; i < raw.length; i++) array[i] = raw.charCodeAt(i);
-                    
-                    mammoth.convertToHtml({ arrayBuffer: array.buffer })
-                        .then(result => {
-                            document.getElementById("content").innerHTML = result.value;
-                        })
-                        .catch(err => {
-                            document.body.innerHTML = "Error rendering document: " + err.message;
-                        });
-                </script>
-            </body>
-        </html>
-        """
-    } catch (e: Exception) {
-        "Error rendering document: ${e.localizedMessage}"
-    }
-}
+///**
+// * Renders a Word document as HTML in a WebView.
+// */
+//@Composable
+//fun WordDocumentView(htmlContent: String) {
+//    AndroidView(
+//        factory = { context ->
+//            WebView(context).apply {
+//                //TODO LOOK INTO THIS AS TO NOT INTRODUCE VULNERABILITIES
+//                settings.javaScriptEnabled = true
+//                webViewClient = WebViewClient()
+//                loadDataWithBaseURL(
+//                    null, htmlContent, "text/html", "UTF-8", null
+//                )
+//            }
+//        })
+//}
+//
+///**
+// * Converts a Word document to HTML.
+// */
+//suspend fun convertWordToHtml(context: Context, uri: Uri): String {
+//    return try {
+//        val inputStream = context.contentResolver.openInputStream(uri)
+//        val bytes = inputStream?.readBytes() ?: byteArrayOf()
+//        val base64 = android.util.Base64.encodeToString(bytes, android.util.Base64.DEFAULT)
+//        """
+//        <html>
+//            <head>
+//                <script src="file:///android_asset/js/mammoth.browser.min.js"></script>
+//                <style>
+//                    body { font-family: sans-serif; line-height: 1.6; padding: 20px }
+//                    table { border-collapse: collapse; width: 100% }
+//                    td, th { border: 1px solid #ddd; padding: 8px }
+//                    img { max-width: 100% }
+//                </style>
+//            </head>
+//            <body>
+//                <div id="content"></div>
+//                <script>
+//                    const base64 = "$base64";
+//                    const raw = atob(base64);
+//                    const array = new Uint8Array(raw.length);
+//                    for (let i = 0; i < raw.length; i++) array[i] = raw.charCodeAt(i);
+//
+//                    mammoth.convertToHtml({ arrayBuffer: array.buffer })
+//                        .then(result => {
+//                            document.getElementById("content").innerHTML = result.value;
+//                        })
+//                        .catch(err => {
+//                            document.body.innerHTML = "Error rendering document: " + err.message;
+//                        });
+//                </script>
+//            </body>
+//        </html>
+//        """
+//    } catch (e: Exception) {
+//        "Error rendering document: ${e.localizedMessage}"
+//    }
+//}
