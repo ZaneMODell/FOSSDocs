@@ -25,17 +25,16 @@ android {
     }
 
     sourceSets {
+        getByName("main").java.srcDir("build/generated/ksp/main/kotlin")
+        getByName("debug").java.srcDir("build/generated/ksp/debug/kotlin")
+        getByName("release").java.srcDir("build/generated/ksp/release/kotlin")
+
         getByName("test") {
             resources.srcDirs("src/test/resources")
             assets.srcDirs("src/test/assets")
         }
     }
 
-    kotlin {
-        sourceSets.all {
-            kotlin.srcDir("build/generated/ksp/${name}/kotlin/")
-        }
-    }
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -45,17 +44,24 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+
     kotlinOptions {
         jvmTarget = "11"
     }
+
     buildFeatures {
         compose = true
     }
+    lint {
+        disable += listOf("RestrictedApi")
+    }
 }
+
 
 dependencies {
 

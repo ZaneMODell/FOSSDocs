@@ -1,17 +1,17 @@
 package com.zaneodell.fossdocs.screens
 
+
 import android.annotation.SuppressLint
-import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
-import android.webkit.WebView
-import android.webkit.WebViewClient
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.rememberTransformableState
 import androidx.compose.foundation.gestures.transformable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -28,15 +28,18 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -49,17 +52,18 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
-import coil3.util.Logger
+import androidx.compose.ui.unit.sp
+import com.zaneodell.fossdocs.DocumentEvent
+import com.zaneodell.fossdocs.DocumentState
+import com.zaneodell.fossdocs.SortType
 import com.zaneodell.fossdocs.models.data.SearchResults
-import com.zaneodell.fossdocs.models.view.sampleDocs
-import com.zaneodell.fossdocs.screencomponents.DocumentPreviewCard
 import com.zaneodell.fossdocs.screencomponents.PdfPage
 import com.zaneodell.fossdocs.utilities.DeviceUtils
 import com.zaneodell.fossdocs.utilities.PdfBitmapConverter
@@ -79,7 +83,9 @@ import kotlinx.coroutines.withContext
 @Composable
 fun MainScreen(
     fileUri: Uri?, // Added fileUri parameter for "Open with" functionality
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    state: DocumentState,
+    onEvent: (DocumentEvent) -> Unit
 ) {
     val context = LocalContext.current
     val pdfBitmapConverter = remember { PdfBitmapConverter(context) }
@@ -93,9 +99,6 @@ fun MainScreen(
 
     var scale by remember { mutableFloatStateOf(1f) }
     var offset by remember { mutableStateOf(Offset.Zero) }
-
-    //TODO CHANGE THIS AND ALL LOGIC WITH IT ONCE LOCAL DB STORAGE IS IMPLEMENTED
-    var arePreviousDocs by remember { mutableStateOf(false) }
 
     // File picker launcher for PDF and Word files
     val filePickerLauncher = rememberLauncherForActivityResult(
@@ -113,6 +116,8 @@ fun MainScreen(
                 "application/pdf" -> {
                     isLoading = true
                     isWordDoc = false
+                    onEvent(DocumentEvent.SaveDocument)
+
                     renderedPages = pdfBitmapConverter.pdfToBitmaps(uri)
                     isLoading = false
                 }
@@ -131,7 +136,7 @@ fun MainScreen(
     }
 
     // If no file is selected, show the default screen
-    if (arePreviousDocs && (localFileUri == null)) {
+    if (state.documents.isNotEmpty() && (localFileUri == null)) {
         Scaffold(modifier = modifier) { innerPadding ->
             Column {
                 LazyVerticalStaggeredGrid(
@@ -141,8 +146,46 @@ fun MainScreen(
                         .height(650.dp),
                     contentPadding = innerPadding
                 ) {
-                    items(sampleDocs) { documentPreviewVM ->
-                        DocumentPreviewCard(documentPreviewVM)
+                    item {
+                        Row(
+                            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                            verticalAlignment = CenterVertically
+                        ) {
+                            SortType.entries.forEach { sortType ->
+                                Row(
+                                    modifier = Modifier.clickable{
+                                        onEvent(DocumentEvent.SortDocuments(sortType))
+                                    },
+                                    verticalAlignment = CenterVertically
+                                ) {
+                                    RadioButton(selected = state.sortType == sortType, onClick = {
+                                        onEvent(DocumentEvent.SortDocuments(sortType))
+                                    })
+                                    Text(text = sortType.name)
+                                }
+                            }
+                        }
+                    }
+                    items(state.documents) { document ->
+//                        DocumentPreviewCard(documentPreviewVM)
+                        Row(
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Column(
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Text(
+                                    text = "${document.name} ${document.lastOpened}",
+                                    fontSize = 20.sp
+                                )
+                                Text(document.path, fontSize = 15.sp)
+                            }
+                            IconButton(onClick = {
+                                onEvent(DocumentEvent.DeleteDocument(document))
+                            }) {
+                                Icon(Icons.Default.Delete, contentDescription = "delete the document")
+                            }
+                        }
                     }
                 }
                 Column(
@@ -158,7 +201,6 @@ fun MainScreen(
                                 "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                             )
                         )
-                        arePreviousDocs = true
                     }) {
                         Text("Select a Document")
                     }
@@ -166,7 +208,7 @@ fun MainScreen(
             }
         }
     }
-    else if (!arePreviousDocs){
+    else if (state.documents.isEmpty()){
         Column(
             modifier = Modifier.fillMaxSize()
                 .padding(5.dp),
@@ -181,7 +223,6 @@ fun MainScreen(
                         "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                     )
                 )
-                arePreviousDocs = true
             }) {
                 Icon(Icons.Filled.AddCircle, "Floating Action Button")
             }

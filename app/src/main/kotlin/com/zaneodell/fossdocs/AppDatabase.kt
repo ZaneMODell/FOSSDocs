@@ -3,7 +3,7 @@ import androidx.room.RoomDatabase
 
 //TODO MAKE SURE THIS WORKS WITH DOCUMENT OBJECT AND DAO
 
-@Database(entities = [Document::class], version = 1)
+@Database(entities = [Document::class], version = 1, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun documentDao(): DocumentDao
 }

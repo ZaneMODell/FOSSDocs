@@ -6,14 +6,19 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import com.zaneodell.fossdocs.models.view.DocumentViewModel
 import com.zaneodell.fossdocs.screens.MainScreen
 import com.zaneodell.fossdocs.ui.theme.FOSSDocsTheme
 
@@ -26,6 +31,19 @@ class MainActivity : ComponentActivity() {
      *
      * @param savedInstanceState current state of the application
      */
+    private val database by lazy { DatabaseProvider.getDatabase(this) }
+
+    private val viewModel by viewModels<DocumentViewModel>(
+        factoryProducer = {
+            object : ViewModelProvider.Factory {
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return DocumentViewModel(database.documentDao()) as T
+                }
+            }
+        }
+    )
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -38,8 +56,9 @@ class MainActivity : ComponentActivity() {
                 // Pass the fileUri to MainScreen
                 var localFileUri by remember { mutableStateOf(fileUri) }
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                    val state by viewModel.state.collectAsState()
                     MainScreen(
-                        fileUri = localFileUri, modifier = Modifier.padding(innerPadding)
+                        fileUri = localFileUri, modifier = Modifier.padding(innerPadding), state = state, onEvent=viewModel::onEvent
                     )
                 }
             }
@@ -60,8 +79,9 @@ class MainActivity : ComponentActivity() {
                 FOSSDocsTheme {
                     var localFileUri by remember { mutableStateOf(fileUri) }
                     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                        val state by viewModel.state.collectAsState()
                         MainScreen(
-                            fileUri = localFileUri, modifier = Modifier.padding(innerPadding)
+                            fileUri = localFileUri, modifier = Modifier.padding(innerPadding), state = state, onEvent=viewModel::onEvent
                         )
                     }
                 }
