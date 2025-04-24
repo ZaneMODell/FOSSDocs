@@ -2,9 +2,12 @@ package com.zaneodell.fossdocs.screens
 
 
 import android.annotation.SuppressLint
+import android.content.ContentResolver
+import android.database.Cursor
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
+import android.provider.OpenableColumns
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -118,7 +121,7 @@ fun MainScreen(
                     isWordDoc = false
                     state.path = uri.toString()
                     state.lastOpened = System.currentTimeMillis()
-                    state.name = uri.lastPathSegment.toString()
+                    state.name = getFileNameFromUri(uri, context.contentResolver).toString()
                     onEvent(DocumentEvent.SaveDocument)
 
                     renderedPages = pdfBitmapConverter.pdfToBitmaps(uri)
@@ -376,6 +379,24 @@ fun MainScreen(
             }
         }
     }
+}
+
+
+fun getFileNameFromUri(uri: Uri, contentResolver: ContentResolver): String? {
+    // Check if the URI is a content URI
+    if (uri.scheme == "content") {
+        val cursor: Cursor? = contentResolver.query(uri, null, null, null, null)
+        cursor?.use {
+            val nameIndex = it.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+            if (it.moveToFirst()) {
+                return it.getString(nameIndex)
+            }
+        }
+    } else if (uri.scheme == "file") {
+        // If it's a file URI, get the last path segment
+        return uri.lastPathSegment
+    }
+    return null
 }
 
 ///**
