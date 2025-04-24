@@ -85,7 +85,7 @@ fun MainScreen(
     fileUri: Uri?, // Added fileUri parameter for "Open with" functionality
     modifier: Modifier = Modifier,
     state: DocumentState,
-    onEvent: (DocumentEvent) -> Unit
+    onEvent: (DocumentEvent) -> Unit,
 ) {
     val context = LocalContext.current
     val pdfBitmapConverter = remember { PdfBitmapConverter(context) }
@@ -116,6 +116,9 @@ fun MainScreen(
                 "application/pdf" -> {
                     isLoading = true
                     isWordDoc = false
+                    state.path = uri.toString()
+                    state.lastOpened = System.currentTimeMillis()
+                    state.name = uri.lastPathSegment.toString()
                     onEvent(DocumentEvent.SaveDocument)
 
                     renderedPages = pdfBitmapConverter.pdfToBitmaps(uri)
