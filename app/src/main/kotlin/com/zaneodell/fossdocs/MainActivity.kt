@@ -1,5 +1,6 @@
 package com.zaneodell.fossdocs
 
+import DatabaseProvider
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -90,24 +91,31 @@ class MainActivity : ComponentActivity() {
     }
 
     /**
-     * Function that processes the intent and returns the URI if it's a supported file type.
+     * Processes an incoming intent and returns a URI if it's a supported document type.
+     * Grants and persists read access to the URI if needed.
      *
      * @param intent The intent to process.
+     * @return The valid document URI, or null if unsupported or inaccessible.
      */
     private fun handleIntent(intent: Intent): Uri? {
-        return when (intent.action) {
-            Intent.ACTION_VIEW -> {
-                val uri = intent.data
-                if (uri != null && isSupportedFileType(uri)) {
-                    uri // Return the URI if it's a supported file type
-                } else {
-                    null
-                }
+        val uri = intent.data
+        if ((intent.action == Intent.ACTION_VIEW || intent.action == Intent.ACTION_OPEN_DOCUMENT) &&
+            uri != null && isSupportedFileType(uri)) {
+            try {
+                // Persist URI permission if available
+                val takeFlags = intent.flags and
+                        (Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+                contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            } catch (e: SecurityException) {
+                e.printStackTrace()
+                return null
             }
-
-            else -> null
+            return uri
         }
+        return null
     }
+
+
 
     /**
      * Takes in a URI and returns true if it's a supported file type.

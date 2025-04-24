@@ -3,6 +3,7 @@ package com.zaneodell.fossdocs.screens
 
 import android.annotation.SuppressLint
 import android.content.ContentResolver
+import android.content.Intent
 import android.database.Cursor
 import android.graphics.Bitmap
 import android.net.Uri
@@ -35,7 +36,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
@@ -62,11 +62,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.zaneodell.fossdocs.DocumentEvent
 import com.zaneodell.fossdocs.DocumentState
 import com.zaneodell.fossdocs.SortType
 import com.zaneodell.fossdocs.models.data.SearchResults
+import com.zaneodell.fossdocs.screencomponents.DocumentPreview
 import com.zaneodell.fossdocs.screencomponents.PdfPage
 import com.zaneodell.fossdocs.utilities.DeviceUtils
 import com.zaneodell.fossdocs.utilities.PdfBitmapConverter
@@ -103,11 +103,20 @@ fun MainScreen(
     var scale by remember { mutableFloatStateOf(1f) }
     var offset by remember { mutableStateOf(Offset.Zero) }
 
-    // File picker launcher for PDF and Word files
     val filePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument()
     ) { uri: Uri? ->
         uri?.let {
+            try {
+                // Persist read access to the selected file
+                val takeFlags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                context.contentResolver.takePersistableUriPermission(it, takeFlags)
+            } catch (e: SecurityException) {
+                e.printStackTrace()
+                // Optionally notify the user
+                return@let
+            }
+
             localFileUri = it
         }
     }
@@ -173,25 +182,7 @@ fun MainScreen(
                         }
                     }
                     items(state.documents) { document ->
-//                        DocumentPreviewCard(documentPreviewVM)
-                        Row(
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Column(
-                                modifier = Modifier.weight(1f)
-                            ) {
-                                Text(
-                                    text = "${document.name} ${document.lastOpened}",
-                                    fontSize = 20.sp
-                                )
-                                Text(document.path, fontSize = 15.sp)
-                            }
-                            IconButton(onClick = {
-                                onEvent(DocumentEvent.DeleteDocument(document))
-                            }) {
-                                Icon(Icons.Default.Delete, contentDescription = "delete the document")
-                            }
-                        }
+                        DocumentPreview(document, onEvent, context.contentResolver)
                     }
                 }
                 Column(
