@@ -52,14 +52,35 @@ class DocumentViewModel(private val dao: DocumentDao) : ViewModel() {
                     return
                 }
 
-                val document = Document(
-                    name = name,
-                    path = path,
-                    lastOpened = lastOpened
-
-                )
+                var document: Document? = null
                 viewModelScope.launch {
-                    dao.insert(document)
+                    document = dao.getByPath(path)
+                }
+
+
+                if (document != null) {
+                    // Found it, just update lastOpened
+                    document = Document(
+                        id = document!!.id,
+                        name = document!!.name,
+                        path = document!!.path,
+                        lastOpened = lastOpened
+
+                    )
+                    viewModelScope.launch {
+                        dao.insert(document!!)
+                    }
+                } else {
+                    //Make new doc
+                    document = Document(
+                        name = name,
+                        path = path,
+                        lastOpened = lastOpened
+
+                    )
+                    viewModelScope.launch {
+                        dao.insert(document!!)
+                    }
                 }
                 _state.update { it.copy(
                     isAddingDocument = false,

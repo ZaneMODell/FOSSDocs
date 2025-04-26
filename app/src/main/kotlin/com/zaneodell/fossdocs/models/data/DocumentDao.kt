@@ -1,9 +1,7 @@
+
 import androidx.room.Dao
 import androidx.room.Delete
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.Update
 import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
 
@@ -17,6 +15,10 @@ interface DocumentDao {
 
     @Query("SELECT * FROM documents ORDER BY name ASC")
     fun getAllByName(): Flow<List<Document>>
+
+    @Query("SELECT * FROM documents WHERE path = :uri LIMIT 1")
+    suspend fun getByPath(uri: String): Document?
+
 
     @Upsert
     suspend fun insert(document: Document)

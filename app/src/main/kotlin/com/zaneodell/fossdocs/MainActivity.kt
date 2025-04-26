@@ -105,7 +105,17 @@ class MainActivity : ComponentActivity() {
                 // Persist URI permission if available
                 val takeFlags = intent.flags and
                         (Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-                contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+
+                // Check for read permission
+                if (takeFlags and Intent.FLAG_GRANT_READ_URI_PERMISSION != 0) {
+                    contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+
+                // Check for write permission
+                if (takeFlags and Intent.FLAG_GRANT_WRITE_URI_PERMISSION != 0) {
+                    contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+                }
+
             } catch (e: SecurityException) {
                 e.printStackTrace()
                 return null
@@ -114,6 +124,8 @@ class MainActivity : ComponentActivity() {
         }
         return null
     }
+
+
 
 
 

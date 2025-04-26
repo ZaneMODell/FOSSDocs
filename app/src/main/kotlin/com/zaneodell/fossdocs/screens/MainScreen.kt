@@ -1,6 +1,7 @@
 package com.zaneodell.fossdocs.screens
 
 
+import DocumentPreview
 import android.annotation.SuppressLint
 import android.content.ContentResolver
 import android.content.Intent
@@ -62,11 +63,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import com.zaneodell.fossdocs.DocumentEvent
 import com.zaneodell.fossdocs.DocumentState
 import com.zaneodell.fossdocs.SortType
 import com.zaneodell.fossdocs.models.data.SearchResults
-import com.zaneodell.fossdocs.screencomponents.DocumentPreview
 import com.zaneodell.fossdocs.screencomponents.PdfPage
 import com.zaneodell.fossdocs.utilities.DeviceUtils
 import com.zaneodell.fossdocs.utilities.PdfBitmapConverter
@@ -182,7 +183,9 @@ fun MainScreen(
                         }
                     }
                     items(state.documents) { document ->
-                        DocumentPreview(document, onEvent, context.contentResolver)
+                        DocumentPreview(document, onClick = {
+                            localFileUri = document.path.toUri()
+                        })
                     }
                 }
                 Column(
@@ -371,6 +374,7 @@ fun MainScreen(
         }
     }
 }
+
 
 
 fun getFileNameFromUri(uri: Uri, contentResolver: ContentResolver): String? {
