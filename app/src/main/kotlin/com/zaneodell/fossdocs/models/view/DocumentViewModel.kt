@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.zaneodell.fossdocs.DocumentEvent
 import com.zaneodell.fossdocs.DocumentState
 import com.zaneodell.fossdocs.SortType
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
@@ -17,6 +18,7 @@ import kotlinx.coroutines.launch
 
 class DocumentViewModel(private val dao: DocumentDao) : ViewModel() {
     private val _sortType = MutableStateFlow(SortType.LASTOPENED)
+    @OptIn(ExperimentalCoroutinesApi::class)
     private val _documents = _sortType.flatMapLatest { sortType ->
         when(sortType) {
             SortType.NAME -> dao.getAllByName()
@@ -44,50 +46,30 @@ class DocumentViewModel(private val dao: DocumentDao) : ViewModel() {
                 _state.update { it.copy(isAddingDocument = false) }
             }
             DocumentEvent.SaveDocument -> {
-                val name = state.value.name
-                val path = state.value.path
-                val lastOpened = state.value.lastOpened
-
-                if (name.isBlank() || path.isBlank()){
-                    return
-                }
-
-                var document: Document? = null
                 viewModelScope.launch {
-                    document = dao.getByPath(path)
-                }
+                    val name = state.value.name
+                    val path = state.value.path
+                    val lastOpened = state.value.lastOpened
 
-
-                if (document != null) {
-                    // Found it, just update lastOpened
-                    document = Document(
-                        id = document!!.id,
-                        name = document!!.name,
-                        path = document!!.path,
-                        lastOpened = lastOpened
-
-                    )
-                    viewModelScope.launch {
-                        dao.insert(document!!)
+                    if (name.isBlank() || path.isBlank()) {
+                        return@launch
                     }
-                } else {
-                    //Make new doc
-                    document = Document(
-                        name = name,
-                        path = path,
-                        lastOpened = lastOpened
 
-                    )
-                    viewModelScope.launch {
-                        dao.insert(document!!)
+                    val existing = dao.getByPath(path)
+
+                    val document = existing?.copy(lastOpened = lastOpened)
+                        ?: Document(name = name, path = path, lastOpened = lastOpened)
+
+                    dao.insert(document)
+
+                    _state.update {
+                        it.copy(
+                            isAddingDocument = false,
+                            name = "",
+                            path = ""
+                        )
                     }
                 }
-                _state.update { it.copy(
-                    isAddingDocument = false,
-                    name = "",
-                    path = ""
-
-                ) }
             }
             is DocumentEvent.SetLastOpened -> {
                 _state.update { it.copy(
