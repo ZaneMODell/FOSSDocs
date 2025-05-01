@@ -56,7 +56,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -154,40 +153,50 @@ fun MainScreen(
     // If no file is selected, show the default screen
     if (state.documents.isNotEmpty() && (localFileUri == null)) {
         Scaffold(modifier = modifier) { innerPadding ->
-            Column {
+            Column(modifier = Modifier.padding(innerPadding)) {
+                //Sort bar
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState())
+                        .padding(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    SortType.entries.forEach { sortType ->
+                        Row(
+                            modifier = Modifier
+                                .clickable {
+                                    onEvent(DocumentEvent.SortDocuments(sortType))
+                                }
+                                .padding(end = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(
+                                selected = state.sortType == sortType,
+                                onClick = {
+                                    onEvent(DocumentEvent.SortDocuments(sortType))
+                                }
+                            )
+                            Text(text = sortType.name)
+                        }
+                    }
+                }
+
+                // Document grid
                 LazyVerticalStaggeredGrid(
                     columns = StaggeredGridCells.Adaptive(100.dp),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(650.dp),
-                    contentPadding = innerPadding
+                        .height(500.dp)
                 ) {
-                    item {
-                        Row(
-                            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-                            verticalAlignment = CenterVertically
-                        ) {
-                            SortType.entries.forEach { sortType ->
-                                Row(
-                                    modifier = Modifier.clickable{
-                                        onEvent(DocumentEvent.SortDocuments(sortType))
-                                    },
-                                    verticalAlignment = CenterVertically
-                                ) {
-                                    RadioButton(selected = state.sortType == sortType, onClick = {
-                                        onEvent(DocumentEvent.SortDocuments(sortType))
-                                    })
-                                    Text(text = sortType.name)
-                                }
-                            }
-                        }
-                    }
                     items(state.documents) { document ->
                         DocumentPreview(document, onClick = {
                             localFileUri = document.path.toUri()
                         })
                     }
                 }
+
+                // Document button
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
