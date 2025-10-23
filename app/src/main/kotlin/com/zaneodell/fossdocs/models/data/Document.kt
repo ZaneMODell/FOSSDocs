@@ -2,6 +2,9 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
+/**
+ * Data class representing a document.
+ */
 @Entity(tableName = "documents")
 data class Document(
     @PrimaryKey(autoGenerate = true)
@@ -13,8 +16,3 @@ data class Document(
     @ColumnInfo(name = "lastOpened")
     val lastOpened: Long
 )
-{
-//    fun imagePreview() : Bitmap{
-//
-//    }
-}

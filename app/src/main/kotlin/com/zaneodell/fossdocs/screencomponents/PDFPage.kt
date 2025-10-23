@@ -17,6 +17,11 @@ import com.zaneodell.fossdocs.models.data.SearchResults
 
 /**
  * Renders a single page of a PDF.
+ *
+ * @param page The bitmap of the page.
+ * @param modifier The modifier for the page.
+ * @param searchResults The search results for the page. This will highlight all of the results
+ * in yellow.
  */
 @Composable
 fun PdfPage(
@@ -44,7 +49,10 @@ fun PdfPage(
                         rect.bottom * scaleFactorY
 
                     )
-                    //This is for all of the search results within a PDF file.
+                    /**
+                     * This is for all of the search results within a PDF file.
+                     * Will be highlighted in yellow.
+                     */
                     drawRoundRect(
                         color = Color.Yellow.copy(alpha = 0.5f), topLeft = Offset(
                             x = adjustedRect.left, y = adjustedRect.top

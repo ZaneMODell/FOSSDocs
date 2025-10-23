@@ -25,6 +25,13 @@ import androidx.core.graphics.createBitmap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
+/**
+ * Composable for a document thumbnail. Bitmap inside of the function generated via a helper method.
+ *
+ * @param context The context of the application.
+ * @param fileUri The URI of the file.
+ * @param modifier The modifier for the thumbnail
+ */
 @Composable
 fun DocumentThumbnail(
     context: Context,
@@ -55,6 +62,7 @@ fun DocumentThumbnail(
     }
 }
 
+//TODO This function doesn't really load a thumbnail, it kinda just generates one?
 private suspend fun loadThumbnailOrGenerate(context: Context, uri: Uri): Bitmap? {
     return withContext(Dispatchers.IO) {
         try {
@@ -70,12 +78,27 @@ private suspend fun loadThumbnailOrGenerate(context: Context, uri: Uri): Bitmap?
     }
 }
 
-
+/**
+ * Helper function that returns true if the file is a PDF.
+ *
+ * @param context The context of the application.
+ * @param uri The URI of the file.
+ * @return True if the file is a PDF, false otherwise.
+ */
 private fun isPdf(context: Context, uri: Uri): Boolean {
     val mimeType = context.contentResolver.getType(uri)
     return mimeType == "application/pdf"
 }
 
+
+/**
+ * Generates a thumbnail for a PDF file.
+ *
+ * @param context The context of the application.
+ * @param uri The URI of the PDF file.
+ * @return The generated thumbnail, or null if an error occurred.
+ */
+//TODO go through this function and document it better. I currently have no idea what's going on.
 private fun generatePdfThumbnail(context: Context, uri: Uri): Bitmap? {
     return try {
         val pfd: ParcelFileDescriptor = context.contentResolver.openFileDescriptor(uri, "r") ?: return null

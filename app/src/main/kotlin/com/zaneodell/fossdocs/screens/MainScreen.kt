@@ -1,7 +1,6 @@
 package com.zaneodell.fossdocs.screens
 
 
-import DocumentPreview
 import android.annotation.SuppressLint
 import android.content.ContentResolver
 import android.content.Intent
@@ -67,6 +66,7 @@ import com.zaneodell.fossdocs.DocumentEvent
 import com.zaneodell.fossdocs.DocumentState
 import com.zaneodell.fossdocs.SortType
 import com.zaneodell.fossdocs.models.data.SearchResults
+import com.zaneodell.fossdocs.screencomponents.DocumentPreview
 import com.zaneodell.fossdocs.screencomponents.PdfPage
 import com.zaneodell.fossdocs.utilities.DeviceUtils
 import com.zaneodell.fossdocs.utilities.PdfBitmapConverter

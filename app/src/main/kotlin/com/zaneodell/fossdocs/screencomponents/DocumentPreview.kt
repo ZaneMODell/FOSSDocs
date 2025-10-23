@@ -1,4 +1,5 @@
-
+package com.zaneodell.fossdocs.screencomponents
+import Document
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,8 +13,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
-import com.zaneodell.fossdocs.screencomponents.DocumentThumbnail
 
+/**
+ * Composable for a document preview. Contains and image as well as the document's name.
+ *
+ * @param document The document to preview.
+ * @param onClick The action to perform when the document is clicked.
+ */
 @Composable
 fun DocumentPreview(
     document: Document,
