@@ -1,7 +1,7 @@
+package com.zaneodell.fossdocs.database
+
 import android.content.Context
 import androidx.room.Room
-
-//TODO DOUBLE CHECK THIS WORKS WITH DAO, OBJECT AND DATABASE
 
 object DatabaseProvider {
     @Volatile private var INSTANCE: AppDatabase? = null

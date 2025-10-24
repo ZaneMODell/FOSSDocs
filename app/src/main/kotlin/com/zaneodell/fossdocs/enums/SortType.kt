@@ -1,4 +1,4 @@
-package com.zaneodell.fossdocs
+package com.zaneodell.fossdocs.enums
 
 enum class SortType {
     NAME,

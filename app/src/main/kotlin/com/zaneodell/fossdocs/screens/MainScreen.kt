@@ -62,9 +62,9 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
-import com.zaneodell.fossdocs.DocumentEvent
-import com.zaneodell.fossdocs.DocumentState
-import com.zaneodell.fossdocs.SortType
+import com.zaneodell.fossdocs.enums.SortType
+import com.zaneodell.fossdocs.events.DocumentEvent
+import com.zaneodell.fossdocs.models.data.DocumentState
 import com.zaneodell.fossdocs.models.data.SearchResults
 import com.zaneodell.fossdocs.screencomponents.DocumentPreview
 import com.zaneodell.fossdocs.screencomponents.PdfPage
@@ -97,7 +97,7 @@ fun MainScreen(
     var searchResults by remember { mutableStateOf(emptyList<SearchResults>()) }
     var isLoading by remember { mutableStateOf(false) }
     var isWordDoc by remember { mutableStateOf(false) } // Track if the file is a Word document
-    var wordContent by remember { mutableStateOf<String?>(null) } // Store Word document HTML content
+//    var wordContent by remember { mutableStateOf<String?>(null) } // Store Word document HTML content
     val scope = rememberCoroutineScope()
 
     var scale by remember { mutableFloatStateOf(1f) }

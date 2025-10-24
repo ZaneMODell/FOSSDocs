@@ -1,6 +1,7 @@
-package com.zaneodell.fossdocs
+package com.zaneodell.fossdocs.events
 
 import Document
+import com.zaneodell.fossdocs.enums.SortType
 
 sealed interface DocumentEvent {
 

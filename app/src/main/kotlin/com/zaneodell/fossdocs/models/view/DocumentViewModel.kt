@@ -4,9 +4,9 @@ import Document
 import DocumentDao
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.zaneodell.fossdocs.DocumentEvent
-import com.zaneodell.fossdocs.DocumentState
-import com.zaneodell.fossdocs.SortType
+import com.zaneodell.fossdocs.events.DocumentEvent
+import com.zaneodell.fossdocs.models.data.DocumentState
+import com.zaneodell.fossdocs.enums.SortType
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -17,15 +17,17 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class DocumentViewModel(private val dao: DocumentDao) : ViewModel() {
+
     private val _sortType = MutableStateFlow(SortType.LASTOPENED)
+
     @OptIn(ExperimentalCoroutinesApi::class)
     private val _documents = _sortType.flatMapLatest { sortType ->
         when(sortType) {
             SortType.NAME -> dao.getAllByName()
             SortType.LASTOPENED -> dao.getAllByLastOpened()
         }
-    }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), emptyList<Document>())
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), emptyList())
+
     private val _state = MutableStateFlow(DocumentState())
 
     val state = combine(_state, _sortType, _documents) { state, sortType, documents ->

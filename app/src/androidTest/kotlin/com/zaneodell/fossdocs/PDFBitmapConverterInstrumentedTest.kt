@@ -14,7 +14,7 @@ import java.io.FileOutputStream
 class PdfBitmapConverterInstrumentedTest {
 
     @Test
-    fun testPdfToBitmaps() = runBlocking<Unit> {
+    fun testPdfToBitmaps() = runBlocking {
         // Get both contexts
         val testContext = InstrumentationRegistry.getInstrumentation().context
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
