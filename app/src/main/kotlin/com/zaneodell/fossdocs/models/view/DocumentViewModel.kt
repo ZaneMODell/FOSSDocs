@@ -4,9 +4,9 @@ import Document
 import DocumentDao
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.zaneodell.fossdocs.enums.SortType
 import com.zaneodell.fossdocs.events.DocumentEvent
 import com.zaneodell.fossdocs.models.data.DocumentState
-import com.zaneodell.fossdocs.enums.SortType
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+//TODO FIGURE OUT WHAT IS GOING ON HERE, IT HAS BEEN A LONG TIME SINCE YOU HAVE LOOKED AT THIS
 class DocumentViewModel(private val dao: DocumentDao) : ViewModel() {
 
     private val _sortType = MutableStateFlow(SortType.LASTOPENED)

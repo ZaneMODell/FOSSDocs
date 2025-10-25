@@ -1,4 +1,4 @@
-package com.zaneodell.fossdocs
+package com.zaneodell.fossdocs.activities
 
 import android.content.Intent
 import android.net.Uri
@@ -55,10 +55,13 @@ class MainActivity : ComponentActivity() {
             FOSSDocsTheme {
                 // Pass the fileUri to MainScreen
                 var localFileUri by remember { mutableStateOf(fileUri) }
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                Scaffold(modifier = Modifier.Companion.fillMaxSize()) { innerPadding ->
                     val state by viewModel.state.collectAsState()
                     MainScreen(
-                        fileUri = localFileUri, modifier = Modifier.padding(innerPadding), state = state, onEvent=viewModel::onEvent
+                        fileUri = localFileUri,
+                        modifier = Modifier.Companion.padding(innerPadding),
+                        state = state,
+                        onEvent = viewModel::onEvent
                     )
                 }
             }
@@ -79,10 +82,13 @@ class MainActivity : ComponentActivity() {
             setContent {
                 FOSSDocsTheme {
                     var localFileUri by remember { mutableStateOf(fileUri) }
-                    Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                    Scaffold(modifier = Modifier.Companion.fillMaxSize()) { innerPadding ->
                         val state by viewModel.state.collectAsState()
                         MainScreen(
-                            fileUri = localFileUri, modifier = Modifier.padding(innerPadding), state = state, onEvent=viewModel::onEvent
+                            fileUri = localFileUri,
+                            modifier = Modifier.Companion.padding(innerPadding),
+                            state = state,
+                            onEvent = viewModel::onEvent
                         )
                     }
                 }
