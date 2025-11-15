@@ -6,6 +6,7 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -31,6 +32,7 @@ import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Button
@@ -74,6 +76,7 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+
 
 /**
  * Main screen of the app, shows a list of recent documents and a button to select a file.
@@ -216,7 +219,8 @@ fun MainScreen(
     }
     else if (state.documents.isEmpty()){
         Column(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
                 .padding(5.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
@@ -239,6 +243,9 @@ fun MainScreen(
     }
     // Show the selected file (PDF or Word)
     else {
+        BackHandler {
+            localFileUri = null
+        }
         BoxWithConstraints(
             modifier = Modifier
                 .fillMaxWidth()
@@ -286,6 +293,15 @@ fun MainScreen(
                         CircularProgressIndicator(color = Color.White)
                     }
                 } else {
+                    IconButton(
+                        onClick = { localFileUri = null },
+                        modifier = Modifier.align(Alignment.Start)
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "BackButton"
+                        )
+                    }
                     if (isWordDoc) {
                         // Render Word document
 //                        wordContent?.let { html ->
